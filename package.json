@@ -1,0 +1,22 @@
+{
+  "name": "firebase-repl",
+  "version": "1.0.0",
+  "description": "A Firebase REPL",
+  "main": "fbrepl.js",
+  "bin": {
+    "fbrepl": "./fbrepl.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/casetext/firebase-repl.git"
+  },
+  "author": "daguej",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/casetext/firebase-repl/issues"
+  },
+  "homepage": "https://github.com/casetext/firebase-repl",
+  "dependencies": {
+    "firebase": "^2.2.3"
+  }
+}
