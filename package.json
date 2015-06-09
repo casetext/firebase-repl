@@ -1,6 +1,6 @@
 {
   "name": "firebase-repl",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Firebase REPL",
   "main": "fbrepl.js",
   "bin": {
@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/casetext/firebase-repl",
   "dependencies": {
-    "firebase": "^2.2.3"
+    "firebase": "^2.2.3",
+    "fireproof": "^2.5.2",
+    "q": "^1.4.1"
   }
 }

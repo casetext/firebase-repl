@@ -1,13 +1,19 @@
+#!/usr/bin/env node
+
 var repl = require('repl'),
 	util = require('util'),
 	fs = require('fs');
 
 Firebase = require('firebase');
+Fireproof = require('fireproof');
 
 
 root = new Firebase(process.env.FIREBASE_URL);
 root.auth(process.env.FIREBASE_AUTH_SECRET);
 
+Fireproof.bless(require('q'));
+
+fp = new Fireproof(root);
 
 test=root.child('test');
 
