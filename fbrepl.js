@@ -24,10 +24,17 @@ var Ref = test.__proto__.__proto__;
 Ref.dump = function(depth) {
 	this.once('value', function(snap) {
 		last = snap.val();
-		console.log(util.inspect(last, {
-			colors: true,
-			depth: typeof depth != 'undefined' ? depth : 2
-		}));
+		if (typeof depth == 'string') {
+			fs.writeFile(depth, JSON.stringify(last, null, '\t'), function(err) {
+				if (err) console.error('Could not dump to file', err);
+				else console.log('Dumped to file');
+			});
+		} else {
+			console.log(util.inspect(last, {
+				colors: true,
+				depth: typeof depth != 'undefined' ? depth : 2
+			}));
+		}
 	});
 };
 
