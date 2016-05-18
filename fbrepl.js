@@ -31,6 +31,13 @@ Ref.dump = function(depth) {
 	});
 };
 
+Ref.get = function() {
+	this.once('value', function(snap) {
+		last = snap.val();
+		console.log('ok');
+	});
+};
+
 Ref.count = function() {
 	this.once('value', function(snap) {
 		var o = snap.val(), i = 0;
