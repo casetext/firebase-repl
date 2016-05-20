@@ -2,6 +2,7 @@
 
 var repl = require('repl'),
 	util = require('util'),
+	json2csv = require('json2csv'),
 	fs = require('fs');
 
 Firebase = require('firebase');
@@ -25,10 +26,38 @@ Ref.dump = function(depth) {
 	this.once('value', function(snap) {
 		last = snap.val();
 		if (typeof depth == 'string') {
-			fs.writeFile(depth, JSON.stringify(last, null, '\t'), function(err) {
-				if (err) console.error('Could not dump to file', err);
-				else console.log('Dumped to file');
-			});
+			if (depth.substr(-4) == '.csv') {
+				var data = last;
+				if (!Array.isArray(data)) {
+					data = [];
+					for (var k in last) {
+						var row = { _key: k };
+						if (typeof last[k] == 'object') {
+							for (var prop in last[k]) {
+								row[prop] = last[k][prop];
+							}
+						} else {
+							row._value = last[k];
+						}
+						data.push(row);
+					}
+				}
+				json2csv({
+					data: data,
+					flatten: true
+				}, function(err, csv) {
+					if (err) console.error('Could not generate CSV', err);
+					else fs.writeFile(depth, csv, function(err) {
+						if (err) console.error('Could not write CSV', err);
+						else console.log('Dumped to CSV');
+					});
+				});
+			} else {
+				fs.writeFile(depth, JSON.stringify(last, null, '\t'), function(err) {
+					if (err) console.error('Could not dump to file', err);
+					else console.log('Dumped to file');
+				});
+			}
 		} else {
 			console.log(util.inspect(last, {
 				colors: true,
