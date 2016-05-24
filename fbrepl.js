@@ -25,47 +25,80 @@ var Ref = test.__proto__.__proto__;
 Ref.dump = function(depth) {
 	this.once('value', function(snap) {
 		last = snap.val();
-		if (typeof depth == 'string') {
-			if (depth.substr(-4) == '.csv') {
-				var data = last;
-				if (!Array.isArray(data)) {
-					data = [];
-					for (var k in last) {
-						var row = { _key: k };
-						if (typeof last[k] == 'object') {
-							for (var prop in last[k]) {
-								row[prop] = last[k][prop];
-							}
-						} else {
-							row._value = last[k];
-						}
-						data.push(row);
-					}
-				}
-				json2csv({
-					data: data,
-					flatten: true
-				}, function(err, csv) {
-					if (err) console.error('Could not generate CSV', err);
-					else fs.writeFile(depth, csv, function(err) {
-						if (err) console.error('Could not write CSV', err);
-						else console.log('Dumped to CSV');
-					});
-				});
-			} else {
-				fs.writeFile(depth, JSON.stringify(last, null, '\t'), function(err) {
-					if (err) console.error('Could not dump to file', err);
-					else console.log('Dumped to file');
-				});
-			}
+		doDump([last], depth);
+	});
+};
+
+
+var stashes = [];
+Ref.stash = function() {
+	this.once('value', function(snap) {
+		var val = snap.val();
+		stashes.push(val);
+		if (val && typeof val == 'object') {
+			console.log('Stashed object with ' + Object.keys(val).length + ' keys!');
 		} else {
-			console.log(util.inspect(last, {
-				colors: true,
-				depth: typeof depth != 'undefined' ? depth : 2
-			}));
+			console.log('Stashed non-object!');
 		}
 	});
 };
+
+dumpStash = function(file) {
+	doDump(stashes, file);
+	stashes = [];
+}
+
+function doDump(data, depth) {
+	if (typeof depth == 'string') {
+		if (depth.substr(-4) == '.csv') {
+
+			var out = [];
+
+			data.forEach(function(item) {
+				if (!Array.isArray(item)) {
+					for (var k in item) {
+						var row = { _key: k };
+						if (typeof item[k] == 'object') {
+							for (var prop in item[k]) {
+								row[prop] = item[k][prop];
+							}
+						} else {
+							row._value = item[k];
+						}
+						out.push(row);
+					}
+				} else {
+					out.push.apply(out, item);
+				}
+			});
+
+
+			json2csv({
+				data: out,
+				flatten: true
+			}, function(err, csv) {
+				if (err) console.error('Could not generate CSV', err);
+				else fs.writeFile(depth, csv, function(err) {
+					if (err) console.error('Could not write CSV', err);
+					else console.log('Dumped to CSV');
+				});
+			});
+		} else {
+			fs.writeFile(depth, JSON.stringify(last, null, '\t'), function(err) {
+				if (err) console.error('Could not dump to file', err);
+				else console.log('Dumped to file');
+			});
+		}
+	} else {
+		data.forEach(function(item, i) {
+			if (i > 0) console.log('--------------------');
+			console.log(util.inspect(item, {
+				colors: true,
+				depth: typeof depth != 'undefined' ? depth : 2
+			}));
+		});
+	}
+}
 
 Ref.get = function() {
 	this.once('value', function(snap) {
